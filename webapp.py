@@ -197,7 +197,7 @@ def index():
 @app.route('/kopo.js', methods=('GET',))
 def kopojs():
     platform=request.args.get('platform',request.user_agent.platform)
-    ip=request.args.get('ip',request.remote_addr)
+    ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
     return Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
                                    ,freedoms=json.dumps(getFreedoms(platform))

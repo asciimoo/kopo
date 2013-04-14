@@ -1,0 +1,9 @@
+thead td {
+   text-align: center;
+   background: #cacaca;
+}
+
+tbody td {
+   background: #eaeaea;
+   margin: 0px;
+}

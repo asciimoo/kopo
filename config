@@ -1,0 +1,6 @@
+[app]
+secret_key          = uOYZDJUsXkHx
+
+[server]
+port                = 5000
+debug               = True

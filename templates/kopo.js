@@ -12,9 +12,9 @@ function init() {
         for(i in scores) {
             tc += '<tr><td>';
             if(scores[i].url) {
-                tc += '<a href="'+scores[i].url+'">'+scores[i].title+'</a>';
+                tc += '<a href="'+scores[i].url+'">'+i+'</a>';
             } else {
-                tc += scores[i].title;
+                tc += i;
             }
             tc += '</td><td style="background: '+scores[i].color+'" title="'+scores[i].text+'">'+scores[i].q+'</td>';
             tc += '<td>'+scores[i].text+'</td></tr>';

@@ -20,6 +20,7 @@
 
 from flask import Flask, request, render_template, Response
 from common import cfg
+from urlparse import urlparse
 import json
 
 app = Flask(__name__)
@@ -37,157 +38,160 @@ def getISP(ip):
     return ip
 
 vendors={
-    'linux': [
-        { 'title': 'Free software',
+    'linux': {
+        'Free software': {
           'url': 'https://www.gnu.org/gnu/manifesto.html',
           'q': 100,
           'text': 'your vendor respects you and allows you to access and share your system freely'},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 90,
            'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 90,
            'text': 'your vendor suggests you have many options available encrypting your communications'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 90,
            'text': 'your vendor suggests you have many options to protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 70,
           'text': 'your vendor allows for many various security defences'},
-         ],
-    'windows': [
-         { 'title': 'Free Software',
+         },
+    'windows': {
+         'Free Software': {
            'url': 'https://www.gnu.org/gnu/manifesto.html',
            'q': 0,
            'text': 'your vendor disrespects you and mostly prohibits access to the source of the system'},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 90,
            'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 10,
            'text': 'your vendor provides barely any encryption tools'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 0,
            'text': 'your vendor provides no tools protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 70,
           'text': 'your vendor provides many disabled-by-default defences'},
-         ],
-    'macos': [
-         { 'title': 'Free Software',
+        },
+    'macos': {
+         'Free Software': {
            'url': 'https://www.gnu.org/gnu/manifesto.html',
            'q': 5,
            'text': 'your vendor disrespects you while it allows access to the kernel, but not the rest of the system.'},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 5,
            'text': 'your vendor nowadays shows total contempt for it\'s users, it does not even allow you to unscrew the case of your device'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 10,
            'text': 'your vendor provides barely any encryption tools'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 0,
            'text': 'your vendor provides no tools protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 20,
           'text': 'your vendor neglects security in favor of shiny pebbles'},
-         ],
-    'iphone': [
-         { 'title': 'Free Software',
+        },
+    'iphone': {
+         'Free Software': {
            'url': 'https://www.gnu.org/gnu/manifesto.html',
            'q': 0,
            'text': 'your vendor disrespects you barring access to the source our your system.'},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 0,
            'text': 'your vendor nowadays shows total contempt for it\'s users right to access the hardware.'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 10,
            'text': 'your vendor provides barely any encryption tools'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 0,
            'text': 'your vendor provides no tools protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 20,
           'text': 'your vendor neglects security in favor of shiny pebbles'},
-         ],
-    'android': [
-         { 'title': 'Free Software',
+        },
+    'android': {
+         'Free Software': {
            'url': 'https://www.gnu.org/gnu/manifesto.html',
            'q': 40,
            'text': 'your vendor uses free software, but provides proprietary features.'},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 90,
            'text': 'your hardware is not really hackable'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 10,
            'text': 'your vendor provides barely any encryption tools'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 0,
            'text': 'your vendor provides no tools protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 40,
           'text': 'your vendor neglects security'},
-         ],
-    'solaris': [
-         { 'title': 'Free Software',
+        },
+    'solaris': {
+         'Free Software': {
            'url': 'https://www.gnu.org/gnu/manifesto.html',
            'q': 80,
            'text': 'your vendor started respecting you in it\'s late days, but does not exist anymore :('},
-         { 'title': 'Hardware',
+         'Hardware': {
            'url': 'http://makezine.com/04/ownyourown/',
            'q': 90,
            'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         { 'title': 'Cryptography',
+         'Cryptography': {
            'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
            'q': 10,
            'text': 'your vendor provides barely any encryption tools'},
-         { 'title': 'Anonymity',
+         'Anonymity': {
            'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
            'q': 0,
            'text': 'your vendor provides no tools protect your identity online'},
-        { 'title': 'Security',
+         'Security': {
           'q': 20,
           'text': 'your vendor once provided proprietary defences'},
-         ],
-    'unknown': [
-         { 'title': 'Free Software',
+         },
+    'unknown': {
+        'Free Software': {
            'q': 50,
            'text': 'unknown'},
-         { 'title': 'Hardware',
+        'Hardware' : {
            'q': 50,
            'text': 'unknown'},
-         { 'title': 'Cryptography',
+        'Cryptography' : {
            'q': 50,
            'text': 'unknown'},
-         { 'title': 'Anonymity',
+        'Anonymity': {
            'q': 50,
            'text': 'unknown'},
-        { 'title': 'Security',
+        'Security': {
           'q': 50,
           'text': 'unknown'},
-         ],
+        },
     }
 
 def getFreedoms(vendor):
     global vendors
-    freedom=vendors.get(vendor, vendors['unknown'])
-    for f in freedom:
-        f['color']="#%02x%02x00" % ((100-f['q'])*255//100, f['q']*255//100)
+    freedom = dict(vendors.get(vendor, vendors['unknown']))
     return freedom
+
+def colorize(o):
+    for k,i in o.iteritems():
+        i['color']="#%02x%02x00" % ((100-i['q'])*255//100, i['q']*255//100)
+    return o
 
 @app.route('/', methods=['GET'])
 def index():
@@ -198,9 +202,15 @@ def index():
 def kopojs():
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
+    referrer = urlparse(request.referrer or '')
+    url      = urlparse(request.url)
+    scores   = getFreedoms(platform)
+    if referrer.netloc and url.netloc != referrer.netloc:
+        scores['Security']['q'] *= 0.8
+
     return Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
-                                   ,freedoms=json.dumps(getFreedoms(platform))
+                                   ,freedoms=json.dumps(colorize(scores))
                                    ,isp=getISP(ip)
                                    )
                    ,mimetype='text/javascript'

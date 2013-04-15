@@ -1,0 +1,2 @@
+** acquire data files
+curl 'http://torstatus.blutmagie.de/ip_list_exit.php/Tor_ip_list_EXIT.csv' -o data/torexits.csv

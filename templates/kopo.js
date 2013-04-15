@@ -1,13 +1,15 @@
 
 var vendor = '{{vendor}}';
 var isp = '{{isp}}';
+var city = '{{city}}';
+var country = '{{country}}';
 var scores = {{ freedoms }};
 var prev_onload_callback = window.onload;
 
 function init() {
     var target = document.getElementById('kopo');
     if(target) {
-        target.appendChild(document.createTextNode('You seem to be using a system from '+vendor+', and use a network provider '+isp));
+        target.appendChild(document.createTextNode('You seem to be located in '+city+', '+country+'. You seem to be using a system from '+vendor+', and use a network provider '+isp));
         var tc = '<thead><tr><td>freedom</td><td>score</td><td>explanation</td></tr></thead><tbody>';
         for(i in scores) {
             tc += '<tr><td>';

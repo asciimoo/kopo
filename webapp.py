@@ -20,7 +20,15 @@
 
 from flask import Flask, request, render_template, Response
 from common import cfg
+from whois import whois
 import json
+import pygeoip
+
+gi = pygeoip.GeoIP('GeoIPCity.dat')
+
+torexits=[]
+with open('torexits.csv', 'r') as fp:
+    torexits=[x.strip() for x in fp]
 
 app = Flask(__name__)
 app.secret_key = cfg.get('app', 'secret_key')
@@ -34,7 +42,15 @@ def contex():
            }
 
 def getISP(ip):
-    return ip
+    tmp=gi.record_by_addr(ip)
+    if ip in torexits:
+        return tmp['city'], tmp['country_name'], "TOR"
+    if tmp:
+        return tmp['city'], tmp['country_name'], whois(ip)[-1]
+    tmp=whois(ip)
+    if tmp:
+        return 'unknown', 'unknown', tmp[-1]
+    return 'unknown', 'unknown', ip
 
 vendors={
     'linux': [
@@ -198,10 +214,13 @@ def index():
 def kopojs():
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
+    city, country, isp = getISP(ip)
     return Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
                                    ,freedoms=json.dumps(getFreedoms(platform))
-                                   ,isp=getISP(ip)
+                                   ,isp=isp
+                                   ,city=city
+                                   ,country=country
                                    )
                    ,mimetype='text/javascript'
                    )

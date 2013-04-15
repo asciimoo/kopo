@@ -20,11 +20,15 @@
 
 from flask import Flask, request, render_template, Response
 from common import cfg
-from whois import whois
+from whois import whois, save
 import json
 import pygeoip
 
 gi = pygeoip.GeoIP('GeoIPCity.dat')
+
+# todo maybe there's a better way to do it
+cache_persistence_period=3 # save cache on every 3rd request
+cache_persistence_counter=0
 
 torexits=[]
 with open('torexits.csv', 'r') as fp:
@@ -212,9 +216,13 @@ def index():
 
 @app.route('/kopo.js', methods=('GET',))
 def kopojs():
+    global cache_persistence_counter
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
     city, country, isp = getISP(ip)
+    cache_persistence_counter+=1
+    if cache_persistence_counter % cache_persistence_period == 0:
+        save()
     return Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
                                    ,freedoms=json.dumps(getFreedoms(platform))

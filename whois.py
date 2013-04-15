@@ -64,9 +64,4 @@ def load(path="whois.cache"):
         cache=msgpack.unpackb(fd.read(),use_list=False)
 
 load()
-#print whois("80.99.33.212")
-#print whois("80.99.239.111")
-#print whois("80.99.32.211")
-#print whois("70.99.32.211")
-#print whois("170.99.32.211")
 #save()

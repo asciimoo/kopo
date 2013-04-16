@@ -20,8 +20,23 @@
 
 from flask import Flask, request, render_template, Response
 from common import cfg
+<<<<<<< HEAD
 from urlparse import urlparse
+=======
+from whois import whois, save
+>>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
 import json
+import pygeoip
+
+gi = pygeoip.GeoIP('GeoIPCity.dat')
+
+# todo maybe there's a better way to do it
+cache_persistence_period=3 # save cache on every 3rd request
+cache_persistence_counter=0
+
+torexits=[]
+with open('torexits.csv', 'r') as fp:
+    torexits=[x.strip() for x in fp]
 
 app = Flask(__name__)
 app.secret_key = cfg.get('app', 'secret_key')
@@ -35,6 +50,7 @@ def contex():
            }
 
 def getISP(ip):
+<<<<<<< HEAD
     return ip
 
 vendors={
@@ -187,6 +203,17 @@ def getFreedoms(vendor):
     global vendors
     freedom = dict(vendors.get(vendor, vendors['unknown']))
     return freedom
+=======
+    tmp=gi.record_by_addr(ip)
+    if ip in torexits:
+        return tmp['city'], tmp['country_name'], "TOR"
+    if tmp:
+        return tmp['city'], tmp['country_name'], whois(ip)[-1]
+    tmp=whois(ip)
+    if tmp:
+        return 'unknown', 'unknown', tmp[-1]
+    return 'unknown', 'unknown', ip
+>>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
 
 def colorize(o):
     for k,i in o.iteritems():
@@ -200,8 +227,10 @@ def index():
 
 @app.route('/kopo.js', methods=('GET',))
 def kopojs():
+    global cache_persistence_counter
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
+<<<<<<< HEAD
     referrer = urlparse(request.referrer or '')
     url      = urlparse(request.url)
     scores   = getFreedoms(platform)
@@ -212,6 +241,17 @@ def kopojs():
                                    ,vendor=request.user_agent.platform
                                    ,freedoms=json.dumps(colorize(scores))
                                    ,isp=getISP(ip)
+=======
+    city, country, isp = getISP(ip)
+    cache_persistence_counter+=1
+    if cache_persistence_counter % cache_persistence_period == 0:
+        save()
+    return Response(render_template('kopo.js'
+                                   ,vendor=request.user_agent.platform
+                                   ,isp=isp
+                                   ,city=city
+                                   ,country=country
+>>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
                                    )
                    ,mimetype='text/javascript'
                    )

@@ -1,6 +1,21 @@
 #!/usr/bin/env python
-
-# src http://code.activestate.com/recipes/576635-whois/
+# This file is part of kopo.
+#
+#  kopo is free software: you can redistribute it and/or
+#  modify it under the terms of the GNU Affero General Public License
+#  as published by the Free Software Foundation, either version 3 of
+#  the License, or (at your option) any later version.
+#
+#  kopo is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public
+#  License along with kopo. If not, see
+#  <http://www.gnu.org/licenses/>.
+#
+# (C) 2013- by Stefan Marsiske <s@ctrlc.hu>
 
 import sys
 import socket
@@ -37,6 +52,7 @@ def whois(ip):
         #print "mask,s %x, %d " % (mask, size)
         return fields
 
+# src http://code.activestate.com/recipes/576635-whois/
 def _whois(ip):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(("asn.shadowserver.org", 43))

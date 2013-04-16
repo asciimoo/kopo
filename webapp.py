@@ -20,11 +20,7 @@
 
 from flask import Flask, request, render_template, Response
 from common import cfg
-<<<<<<< HEAD
-from urlparse import urlparse
-=======
 from whois import whois, save
->>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
 import json
 import pygeoip
 
@@ -50,160 +46,6 @@ def contex():
            }
 
 def getISP(ip):
-<<<<<<< HEAD
-    return ip
-
-vendors={
-    'linux': {
-        'Free software': {
-          'url': 'https://www.gnu.org/gnu/manifesto.html',
-          'q': 100,
-          'text': 'your vendor respects you and allows you to access and share your system freely'},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 90,
-           'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 90,
-           'text': 'your vendor suggests you have many options available encrypting your communications'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 90,
-           'text': 'your vendor suggests you have many options to protect your identity online'},
-         'Security': {
-          'q': 70,
-          'text': 'your vendor allows for many various security defences'},
-         },
-    'windows': {
-         'Free Software': {
-           'url': 'https://www.gnu.org/gnu/manifesto.html',
-           'q': 0,
-           'text': 'your vendor disrespects you and mostly prohibits access to the source of the system'},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 90,
-           'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 10,
-           'text': 'your vendor provides barely any encryption tools'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 0,
-           'text': 'your vendor provides no tools protect your identity online'},
-         'Security': {
-          'q': 70,
-          'text': 'your vendor provides many disabled-by-default defences'},
-        },
-    'macos': {
-         'Free Software': {
-           'url': 'https://www.gnu.org/gnu/manifesto.html',
-           'q': 5,
-           'text': 'your vendor disrespects you while it allows access to the kernel, but not the rest of the system.'},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 5,
-           'text': 'your vendor nowadays shows total contempt for it\'s users, it does not even allow you to unscrew the case of your device'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 10,
-           'text': 'your vendor provides barely any encryption tools'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 0,
-           'text': 'your vendor provides no tools protect your identity online'},
-         'Security': {
-          'q': 20,
-          'text': 'your vendor neglects security in favor of shiny pebbles'},
-        },
-    'iphone': {
-         'Free Software': {
-           'url': 'https://www.gnu.org/gnu/manifesto.html',
-           'q': 0,
-           'text': 'your vendor disrespects you barring access to the source our your system.'},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 0,
-           'text': 'your vendor nowadays shows total contempt for it\'s users right to access the hardware.'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 10,
-           'text': 'your vendor provides barely any encryption tools'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 0,
-           'text': 'your vendor provides no tools protect your identity online'},
-         'Security': {
-          'q': 20,
-          'text': 'your vendor neglects security in favor of shiny pebbles'},
-        },
-    'android': {
-         'Free Software': {
-           'url': 'https://www.gnu.org/gnu/manifesto.html',
-           'q': 40,
-           'text': 'your vendor uses free software, but provides proprietary features.'},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 90,
-           'text': 'your hardware is not really hackable'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 10,
-           'text': 'your vendor provides barely any encryption tools'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 0,
-           'text': 'your vendor provides no tools protect your identity online'},
-         'Security': {
-          'q': 40,
-          'text': 'your vendor neglects security'},
-        },
-    'solaris': {
-         'Free Software': {
-           'url': 'https://www.gnu.org/gnu/manifesto.html',
-           'q': 80,
-           'text': 'your vendor started respecting you in it\'s late days, but does not exist anymore :('},
-         'Hardware': {
-           'url': 'http://makezine.com/04/ownyourown/',
-           'q': 90,
-           'text': 'your vendor suggests you run on mostly freely hackable hardware'},
-         'Cryptography': {
-           'url': 'http://activism.net/cypherpunk/crypto-anarchy.html',
-           'q': 10,
-           'text': 'your vendor provides barely any encryption tools'},
-         'Anonymity': {
-           'url': 'https://www.un.org/en/documents/udhr/index.shtml#a12',
-           'q': 0,
-           'text': 'your vendor provides no tools protect your identity online'},
-         'Security': {
-          'q': 20,
-          'text': 'your vendor once provided proprietary defences'},
-         },
-    'unknown': {
-        'Free Software': {
-           'q': 50,
-           'text': 'unknown'},
-        'Hardware' : {
-           'q': 50,
-           'text': 'unknown'},
-        'Cryptography' : {
-           'q': 50,
-           'text': 'unknown'},
-        'Anonymity': {
-           'q': 50,
-           'text': 'unknown'},
-        'Security': {
-          'q': 50,
-          'text': 'unknown'},
-        },
-    }
-
-def getFreedoms(vendor):
-    global vendors
-    freedom = dict(vendors.get(vendor, vendors['unknown']))
-    return freedom
-=======
     tmp=gi.record_by_addr(ip)
     if ip in torexits:
         return tmp['city'], tmp['country_name'], "TOR"
@@ -213,7 +55,6 @@ def getFreedoms(vendor):
     if tmp:
         return 'unknown', 'unknown', tmp[-1]
     return 'unknown', 'unknown', ip
->>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
 
 def colorize(o):
     for k,i in o.iteritems():
@@ -230,18 +71,6 @@ def kopojs():
     global cache_persistence_counter
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
-<<<<<<< HEAD
-    referrer = urlparse(request.referrer or '')
-    url      = urlparse(request.url)
-    scores   = getFreedoms(platform)
-    if referrer.netloc and url.netloc != referrer.netloc:
-        scores['Security']['q'] *= 0.8
-
-    return Response(render_template('kopo.js'
-                                   ,vendor=request.user_agent.platform
-                                   ,freedoms=json.dumps(colorize(scores))
-                                   ,isp=getISP(ip)
-=======
     city, country, isp = getISP(ip)
     cache_persistence_counter+=1
     if cache_persistence_counter % cache_persistence_period == 0:
@@ -251,7 +80,6 @@ def kopojs():
                                    ,isp=isp
                                    ,city=city
                                    ,country=country
->>>>>>> 6dc322edecc79e1c29981d93d51d1e327d34009d
                                    )
                    ,mimetype='text/javascript'
                    )

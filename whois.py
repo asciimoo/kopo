@@ -17,7 +17,6 @@
 #
 # (C) 2013- by Stefan Marsiske <s@ctrlc.hu>
 
-import sys
 import socket
 import msgpack
 import shutil
@@ -79,5 +78,8 @@ def load(path="whois.cache"):
     with open(path,'r') as fd:
         cache=msgpack.unpackb(fd.read(),use_list=False)
 
+if __name__ == '__main__':
+    from sys import argv
+    if len(argv) == 2 and argv[1] == 'init':
+        save()
 load()
-#save()

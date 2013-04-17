@@ -3,7 +3,6 @@ var vendor = '{{vendor}}';
 var isp = '{{isp}}';
 var city = '{{city}}';
 var country = '{{country}}';
-var scores = {{ freedoms }};
 var prev_onload_callback = window.onload;
 
 function init() {

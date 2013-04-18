@@ -71,11 +71,12 @@ def kopojs():
     global cache_persistence_counter
     platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
+
     city, country, isp = getISP(ip)
     cache_persistence_counter+=1
     if cache_persistence_counter % cache_persistence_period == 0:
         save()
-    return Response(render_template('kopo.js'
+    resp = Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
                                    ,isp=isp
                                    ,city=city
@@ -83,7 +84,8 @@ def kopojs():
                                    )
                    ,mimetype='text/javascript'
                    )
-
+    resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
+    return resp
 
 @app.route('/crypto.html', methods=['GET'])
 def crypto():

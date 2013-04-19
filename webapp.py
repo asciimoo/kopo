@@ -21,7 +21,7 @@
 from flask import Flask, request, render_template, Response
 from common import cfg
 from whois import whois, save
-import json
+import json, tempfile, os
 import pygeoip
 
 gi = pygeoip.GeoIP('GeoIPCity.dat')
@@ -71,15 +71,42 @@ def kopojs():
     cache_persistence_counter+=1
     if cache_persistence_counter % cache_persistence_period == 0:
         save()
+
+    # etag tracking, saves in /tmp/tmpXXX..
+    tmpf=None
+    evisits=1
+    if request.if_none_match:
+        etag=request.if_none_match.to_header()[1:-1]
+        if len(etag)==len(''.join([x for x
+                                   in etag
+                                   if x.isalnum() or x in ['_']])):
+            tmpf='/tmp/tmp'+etag
+            print tmpf
+            try:
+                with open(tmpf,'r') as fd:
+                    evisits=int(fd.read())
+            except:
+                tmpf=None
+            else:
+                evisits+=1
+                with open(tmpf,'w') as fd:
+                    fd.write(str(evisits))
     resp = Response(render_template('kopo.js'
                                    ,vendor=request.user_agent.platform
                                    ,isp=isp
                                    ,city=city
+                                   ,evisits=evisits
                                    ,country=country
                                    )
                    ,mimetype='text/javascript'
                    )
     resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
+    if not tmpf:
+        fd, tmpf = tempfile.mkstemp()
+        print 'new tmpf', tmpf
+        with os.fdopen(fd,'w') as f:
+            f.write('1')
+    resp.headers['ETag']=tmpf[8:]
     return resp
 
 @app.route('/crypto.html', methods=['GET'])

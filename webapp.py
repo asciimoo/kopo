@@ -37,6 +37,9 @@ with open('torexits.csv', 'r') as fp:
 app = Flask(__name__)
 app.secret_key = cfg.get('app', 'secret_key')
 
+vendormap={"windows": "Microsoft",
+          "linux": "Linux",}
+
 @app.context_processor
 def contex():
     global cfg, query
@@ -58,7 +61,6 @@ def getISP(ip):
 
 @app.route('/', methods=['GET'])
 def index():
-    print request.user_agent
     return render_template('index.html')
 
 @app.route('/kopo.js', methods=('GET',))
@@ -77,12 +79,10 @@ def kopojs():
     evisits=1
     if request.if_none_match:
         etag=request.if_none_match.to_header()[1:-1]
-        print 'etag', etag
         if len(etag)==len(''.join([x for x
                                    in etag
                                    if x.isalnum() or x in ['_']])):
             tmpf='/tmp/kopo-etag-'+etag
-            print tmpf
             try:
                 with open(tmpf,'r') as fd:
                     evisits=int(fd.read())
@@ -93,7 +93,7 @@ def kopojs():
                 with open(tmpf,'w') as fd:
                     fd.write(str(evisits))
     resp = Response(render_template('kopo.js'
-                                   ,vendor=request.user_agent.platform
+                                   ,vendor=vendormap.get(request.user_agent.platform,request.user_agent.platform)
                                    ,isp=isp
                                    ,city=city
                                    ,evisits=evisits
@@ -106,7 +106,6 @@ def kopojs():
     if not tmpf:
         # initalize etag storage
         fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
-        print 'new tmpf', tmpf
         with os.fdopen(fd,'w') as f:
             f.write('1')
         etag=tmpf[len("/tmp/kopo-etag-"):]

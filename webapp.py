@@ -85,37 +85,34 @@ def kopojs():
             tmpf='/tmp/kopo-etag-'+etag
             try:
                 with open(tmpf,'r') as fd:
-                    evisits=int(fd.read())
+                    evisits=[x.strip() for x in fd.readlines()]
             except:
                 tmpf=None
             else:
-                evisits+=1
+                evisits.append(repr(request.referrer))
                 with open(tmpf,'w') as fd:
-                    fd.write(str(evisits))
+                    fd.write('\n'.join(evisits))
+    if not tmpf:
+        # initalize etag storage
+        evisits=[request.referrer]
+        fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
+        with os.fdopen(fd,'w') as f:
+            f.write('\n'.join(evisits))
+        etag=tmpf[len("/tmp/kopo-etag-"):]
     resp = Response(render_template('kopo.js'
                                    ,vendor=vendormap.get(request.user_agent.platform,request.user_agent.platform)
                                    ,isp=isp
                                    ,city=city
-                                   ,evisits=evisits
+                                   ,evisits=json.dumps(evisits or [])
                                    ,country=country
                                    )
                    ,mimetype='text/javascript'
                    )
     # set a cookie
     resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
-    if not tmpf:
-        # initalize etag storage
-        fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
-        with os.fdopen(fd,'w') as f:
-            f.write('1')
-        etag=tmpf[len("/tmp/kopo-etag-"):]
     # set etag id
     resp.headers['ETag']=etag
     return resp
-
-@app.route('/crypto.html', methods=['GET'])
-def crypto():
-    return render_template('crypto.html')
 
 if __name__ == "__main__":
     app.run(debug        = cfg.get('server', 'debug')

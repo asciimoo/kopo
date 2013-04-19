@@ -21,7 +21,7 @@
 from flask import Flask, request, render_template, Response
 from common import cfg
 from whois import whois, save
-import json
+import json, tempfile, os
 import pygeoip
 
 gi = pygeoip.GeoIP('GeoIPCity.dat')
@@ -36,6 +36,9 @@ with open('torexits.csv', 'r') as fp:
 
 app = Flask(__name__)
 app.secret_key = cfg.get('app', 'secret_key')
+
+vendormap={"windows": "Microsoft",
+          "linux": "Linux",}
 
 @app.context_processor
 def contex():
@@ -63,7 +66,6 @@ def colorize(o):
 
 @app.route('/', methods=['GET'])
 def index():
-    print request.user_agent
     return render_template('index.html')
 
 @app.route('/kopo.js', methods=('GET',))
@@ -76,20 +78,46 @@ def kopojs():
     cache_persistence_counter+=1
     if cache_persistence_counter % cache_persistence_period == 0:
         save()
+
+    # etag tracking, saves in /tmp/kopo-etag-XXX..
+    tmpf=None
+    evisits=1
+    if request.if_none_match:
+        etag=request.if_none_match.to_header()[1:-1]
+        if len(etag)==len(''.join([x for x
+                                   in etag
+                                   if x.isalnum() or x in ['_']])):
+            tmpf='/tmp/kopo-etag-'+etag
+            try:
+                with open(tmpf,'r') as fd:
+                    evisits=[x.strip() for x in fd.readlines()]
+            except:
+                tmpf=None
+            else:
+                evisits.append(repr(request.referrer))
+                with open(tmpf,'w') as fd:
+                    fd.write('\n'.join(evisits))
+    if not tmpf:
+        # initalize etag storage
+        evisits=[request.referrer]
+        fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
+        with os.fdopen(fd,'w') as f:
+            f.write('\n'.join(evisits))
+        etag=tmpf[len("/tmp/kopo-etag-"):]
     resp = Response(render_template('kopo.js'
-                                   ,vendor=request.user_agent.platform
+                                   ,vendor=vendormap.get(request.user_agent.platform,request.user_agent.platform)
                                    ,isp=isp
                                    ,city=city
+                                   ,evisits=json.dumps(evisits or [])
                                    ,country=country
                                    )
                    ,mimetype='text/javascript'
                    )
+    # set a cookie
     resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
+    # set etag id
+    resp.headers['ETag']=etag
     return resp
-
-@app.route('/crypto.html', methods=['GET'])
-def crypto():
-    return render_template('crypto.html')
 
 if __name__ == "__main__":
     app.run(debug        = cfg.get('server', 'debug')

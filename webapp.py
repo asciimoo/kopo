@@ -72,15 +72,16 @@ def kopojs():
     if cache_persistence_counter % cache_persistence_period == 0:
         save()
 
-    # etag tracking, saves in /tmp/tmpXXX..
+    # etag tracking, saves in /tmp/kopo-etag-XXX..
     tmpf=None
     evisits=1
     if request.if_none_match:
         etag=request.if_none_match.to_header()[1:-1]
+        print 'etag', etag
         if len(etag)==len(''.join([x for x
                                    in etag
                                    if x.isalnum() or x in ['_']])):
-            tmpf='/tmp/tmp'+etag
+            tmpf='/tmp/kopo-etag-'+etag
             print tmpf
             try:
                 with open(tmpf,'r') as fd:
@@ -100,13 +101,17 @@ def kopojs():
                                    )
                    ,mimetype='text/javascript'
                    )
+    # set a cookie
     resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
     if not tmpf:
-        fd, tmpf = tempfile.mkstemp()
+        # initalize etag storage
+        fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
         print 'new tmpf', tmpf
         with os.fdopen(fd,'w') as f:
             f.write('1')
-    resp.headers['ETag']=tmpf[8:]
+        etag=tmpf[len("/tmp/kopo-etag-"):]
+    # set etag id
+    resp.headers['ETag']=etag
     return resp
 
 @app.route('/crypto.html', methods=['GET'])

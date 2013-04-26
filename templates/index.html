@@ -1,7 +1,16 @@
 {% extends "base.html" %}
+{% block styles %}
+<style>
+    #kopo { float: right; }
+</style>
+{% endblock %}
 {% block scripts %}
 <script type="text/javascript" src="/kopo.js"> </script>
 {% endblock %}
 {% block content %}
 <div id="kopo"> </div>
+<h1>Kopo</h1>
+<div>Embed code:
+    <pre>&lt;div id="kopo"&gt; &lt;/div&gt; &lt;script type="text/javascript" src="http://0x2a.tk/kopo.js"&gt; &lt;/script&gt;</pre>
+</div>
 {% endblock %}

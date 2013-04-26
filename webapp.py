@@ -99,7 +99,7 @@ def kopojs():
                     fd.write('\n'.join(evisits))
     if not tmpf:
         # initalize etag storage
-        evisits=[request.referrer]
+        evisits=[request.referrer or "unknown"]
         fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
         with os.fdopen(fd,'w') as f:
             f.write('\n'.join(evisits))

@@ -94,7 +94,7 @@ def kopojs():
             except:
                 tmpf=None
             else:
-                evisits.append(repr(request.referrer))
+                evisits.append(request.referrer or "unknown")
                 with open(tmpf,'w') as fd:
                     fd.write('\n'.join(evisits))
     if not tmpf:

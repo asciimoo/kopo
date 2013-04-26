@@ -71,7 +71,7 @@ def index():
 @app.route('/kopo.js', methods=('GET',))
 def kopojs():
     global cache_persistence_counter
-    platform=request.args.get('platform',request.user_agent.platform)
+    #platform=request.args.get('platform',request.user_agent.platform)
     ip=request.args.get('ip',request.headers.get('x-forwarded-for', request.remote_addr))
 
     city, country, isp = getISP(ip)
@@ -81,7 +81,7 @@ def kopojs():
 
     # etag tracking, saves in /tmp/kopo-etag-XXX..
     tmpf=None
-    evisits=1
+    evisits=[]
     if request.if_none_match:
         etag=request.if_none_match.to_header()[1:-1]
         if len(etag)==len(''.join([x for x

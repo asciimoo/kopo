@@ -4,6 +4,7 @@ var isp = '{{isp}}';
 var city = '{{city}}';
 var country = '{{country}}';
 var evisits = {{evisits}};
+var evisit_count = {{evisit_count}};
 var prev_onload_callback = window.onload;
 
 function getCookie(c_name) {
@@ -46,8 +47,12 @@ function init() {
         target.appendChild(createElement('div', " We also routinely record your IP address and your surfing habits. And there's a few more ways to track you, which we haven't implemented.", 'padding: 4px;'));
 
         target.appendChild(createElement('div', 'You have been seen by this widget', 'background: #000000; color: #FFFFFF; padding-top: 4px;'));
-        target.appendChild(createElement('div', ""+Math.max(evisits.length, cvisits), 'background: #000000; color: #FFFFFF; font-size: 44px;'));
+        target.appendChild(createElement('div', ""+Math.max(evisit_count, cvisits), 'background: #000000; color: #FFFFFF; font-size: 44px;'));
         target.appendChild(createElement('div', 'time(s)', 'background: #000000; color: #FFFFFF; text-align: center; padding-bottom: 4px;'));
+        target.appendChild(createElement('div', 'Previously visited pages:', 'background: #000000; color: #FFFFFF; padding-top: 4px;'));
+        for(var i in evisits) {
+            target.appendChild(createElement('div', ""+evisits[i], 'background: #000000; color: #FFFFFF; font-size: 44px;'));
+        }
     }
     if(prev_onload_callback)
         return prev_onload_callback();

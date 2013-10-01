@@ -23,6 +23,7 @@ from common import cfg
 from whois import whois, save
 import json, tempfile, os
 import pygeoip
+from urlparse import urlparse
 
 gi = pygeoip.GeoIP('GeoIPCity.dat')
 
@@ -94,12 +95,14 @@ def kopojs():
             except:
                 tmpf=None
             else:
-                evisits.append(request.referrer or "unknown")
-                with open(tmpf,'w') as fd:
-                    fd.write('\n'.join(evisits))
+                if request.referrer:
+                    evisits.append(request.referrer)
+                    with open(tmpf,'w') as fd:
+                        fd.write('\n'.join(evisits))
     if not tmpf:
         # initalize etag storage
-        evisits=[request.referrer or "unknown"]
+        if not len(evisits):
+            evisits=[request.referrer or "unknown"]
         fd, tmpf = tempfile.mkstemp(prefix="kopo-etag-")
         with os.fdopen(fd,'w') as f:
             f.write('\n'.join(evisits))
@@ -108,13 +111,14 @@ def kopojs():
                                    ,vendor=vendormap.get(request.user_agent.platform,request.user_agent.platform)
                                    ,isp=isp
                                    ,city=city
-                                   ,evisits=json.dumps(evisits or [])
+                                   ,evisits=json.dumps([urlparse(x).netloc or x for x in set(evisits)])
+                                   ,evisit_count = len(evisits)
                                    ,country=country
                                    )
                    ,mimetype='text/javascript'
                    )
     # set a cookie
-    resp.set_cookie('visits',int(request.cookies.get('visits',0))+1)
+    resp.set_cookie('visits',str(int(request.cookies.get('visits',0))+1))
     # set etag id
     resp.headers['ETag']=etag
     return resp
